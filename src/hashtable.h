@@ -1,6 +1,8 @@
 #ifndef __HASHTABLE_H_
 #define __HASHTABLE_H_
 
+#include <stdio.h>
+
 typedef struct ht_entry_t  ht_entry_t;
 typedef struct hashtable_t hashtable_t;
 
