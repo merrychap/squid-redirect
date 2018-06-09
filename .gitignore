@@ -1,5 +1,6 @@
 # Core files
 core
+.gdb*
 
 # Prerequisites
 *.d
