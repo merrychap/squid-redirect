@@ -3,6 +3,9 @@
 
 #include <stdio.h>
 
+#include "hashtable.h"
+#include "rewriter.h"
+
 typedef enum {
     get_url_null_ptr    = -1,
     realloc_failed      = -2,
@@ -11,9 +14,11 @@ typedef enum {
     open_file_error     = -5
 } utils_error_t;
 
-int parse_url_data(char *line, char *url, char *ch_id);
+int   parse_url_data(char *line, char *url, char *ch_id);
+void  reduce_https(char *url, char *new_url);
 
-int json_load_file(char *filename);
+int json_load_file(rewriter_t *rw, char *filename);
+int get_pair(jsmntok_t *tokens, char *content, size_t index, char *key, char *value);
 
 /* Read file content into content variable.
  * It reallocates content dynamically. After reading

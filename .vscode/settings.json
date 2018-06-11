@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "thread": "c",
-        "typeindex": "c"
+        "typeindex": "c",
+        "ratio": "c",
+        "strstream": "c"
     }
 }

@@ -1,6 +1,7 @@
 # Core files
 core
 .gdb*
+test.py
 
 # Prerequisites
 *.d
