@@ -22,6 +22,7 @@ int main(int argc, char **argv) {
         memset(response, 0, MAX_LEN);
         rewrite_url(&rw, recv_data, response, MAX_LEN);
         fprintf(stdout, "%s", response);
+        syslog(LOG_INFO, "response: %s", response);
         fflush(stdout);
     }
     closelog();

@@ -16,13 +16,39 @@ int parse_url_data(char *line, char *url, char *ch_id) {
     return 0;
 }
 
-void reduce_https(char *url, char *new_url) {
-    size_t url_len = strlen(url);
-    strncpy(new_url, url, url_len-4); // try to erase :443 at the end of url
-    new_url[url_len-4] = '\x00';
+int parse_url_link(const char *url, char *pd_url) {
+    if (startswith(url, "http://"))       strcpy(pd_url, url+7);
+    else if (startswith(url, "https://")) strcpy(pd_url, url+8);
+    else                                  strcpy(pd_url, url);
+
+    size_t pd_url_len = strlen(pd_url);
+
+    for (size_t i = 0; i < pd_url_len; i++) {
+        if (pd_url[i] == ':' || pd_url[i] == '/') {
+            pd_url[i] = '\x00';
+            break;
+        }
+    }
+    return 0;
 }
 
-int get_pair(jsmntok_t *tokens, char *content, size_t index, char *key, char *value) {
+int startswith(const char *str, const char *preffix) {
+    size_t lenpre = strlen(preffix),
+           lenstr = strlen(str);
+    return lenstr < lenpre ? 0 : strncmp(str, preffix, lenpre) == 0;
+}
+
+int endswith(const char *str, const char *suffix) {
+    if (!str || !suffix)
+        return 0;
+    size_t lenstr    = strlen(str);
+    size_t lensuffix = strlen(suffix);
+    if (lensuffix >  lenstr)
+        return 0;
+    return strncmp(str + lenstr - lensuffix, suffix, lensuffix) == 0;
+}
+
+int get_pair(jsmntok_t *tokens, const char *content, size_t index, char *key, char *value) {
     if (tokens == NULL)  return null_tokens_error;
     if (content == NULL) return null_content_error;
     if (key == NULL)     return null_key_error;
@@ -42,7 +68,7 @@ int get_pair(jsmntok_t *tokens, char *content, size_t index, char *key, char *va
     return 0;
 }
 
-int json_load_file(rewriter_t *rw, char *filename) {
+int json_load_file(rewriter_t *rw, const char *filename) {
     size_t exact_size   = 0;
     size_t content_size = START_CONTENT_SIZE;
     char * content      = (char *) malloc(content_size * sizeof(char));
@@ -65,7 +91,7 @@ int json_load_file(rewriter_t *rw, char *filename) {
     return 0;
 }
 
-int read_file(char *filename, char **content, size_t *content_size) {
+int read_file(const char *filename, char **content, size_t *content_size) {
     char ch        = '\x00';
     char *rcontent = *content;
     size_t index   = 0;

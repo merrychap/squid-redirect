@@ -9,11 +9,12 @@
 #define MAX_LEN           1000
 #define TABLE_SIZE        655536 * 8
 #define TOKEN_SIZE        1024
-#define REDIRECTIONS_FILE "redirections.json"
+#define REDIRECTIONS_FILE "/home/kali/Development/Projects/internships/squid-redirect/redirections.json"
 
 int rewrite_url(rewriter_t *rw, char *line, char *resp, size_t resp_size) {
-    char url  [MAX_LEN];
-    char ch_id[MAX_LEN];
+    char url   [MAX_LEN];
+    char pd_url[MAX_LEN];
+    char ch_id [MAX_LEN];
 
     memset(url,   0, MAX_LEN);
     memset(ch_id, 0, MAX_LEN);
@@ -21,20 +22,16 @@ int rewrite_url(rewriter_t *rw, char *line, char *resp, size_t resp_size) {
     syslog(LOG_INFO, "new request: %s", line);
 
     json_load_file(rw, REDIRECTIONS_FILE);
-    if (parse_url_data(line, url, ch_id) != 0) { /* TODO handle exception */ }
+    if (parse_url_data(line, url, ch_id) != 0) { exit(1); /* TODO handle exception */ }
+    if (parse_url_link(url, pd_url) != 0)      { exit(1); /* TODO handle exception */ }
 
-    char *new_url = ht_get(rw->table, url);
+    char *new_url = ht_get(rw->table, pd_url);
 
-    if (new_url == NULL) {
-        char red_url[MAX_LEN];
-        reduce_https(url, red_url);
+    // syslog(LOG_INFO, "redirection: %s", new_url);
 
-        char *new_url = ht_get(rw->table, red_url);
-
-        if (new_url == NULL) snprintf(resp, resp_size, "%s OK\n", ch_id);
-        else snprintf(resp, resp_size, "%s OK rewrite-url=%s\n", ch_id, new_url);
-    }
-    else snprintf(resp, resp_size, "%s OK rewrite-url=%s\n", ch_id, new_url);
+    if (new_url == NULL) snprintf(resp, resp_size, "%s OK\n", ch_id);
+    else snprintf(resp, resp_size, "%s OK status=301 url=https://%s\n", ch_id, new_url);
+    // else snprintf(resp, resp_size, "%s OK rewrite-url=%s\n", ch_id, new_url);
 
     return 0;
 }
@@ -73,6 +70,7 @@ int rewriter_update(rewriter_t *rw, char *content, jsmntok_t *tokens, int count)
 
     for (size_t i = 1; i < count; i += 2) {
         get_pair(tokens, content, i, ps_key, ps_value);
+        syslog(LOG_INFO, "%s : %s", ps_key, ps_value);
         // printf("%s: %s\n", ps_key, ps_value);
         ht_insert(rw->table, ps_key, ps_value);
     }
