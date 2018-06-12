@@ -6,8 +6,9 @@
 #include "rewriter.h"
 #include "utils.h"
 
-#define True    1
-#define MAX_LEN 1000
+#define True      1
+#define MAX_LEN   1000
+#define DELIMITER "========================="
 
 int main(int argc, char **argv) {
     rewriter_t rw;
@@ -19,11 +20,15 @@ int main(int argc, char **argv) {
     rewriter_init(&rw);
     
     while (fgets(recv_data, MAX_LEN-1, stdin) != NULL) {
+        syslog(LOG_INFO, DELIMITER);
+        
         memset(response, 0, MAX_LEN);
         rewrite_url(&rw, recv_data, response, MAX_LEN);
+        
         fprintf(stdout, "%s", response);
-        syslog(LOG_INFO, "response: %s", response);
         fflush(stdout);
+        
+        syslog(LOG_INFO, "<- response: %s", response);
     }
     closelog();
     return 0;
