@@ -79,6 +79,8 @@ int rewriter_update(rewriter_t *rw, char *content, jsmntok_t *tokens, int count)
     }
 
 update_rw:
+    free(rw->__content);
+
     rw->__tokens  = tokens;
     rw->__content = content;
     rw->__count   = count;
