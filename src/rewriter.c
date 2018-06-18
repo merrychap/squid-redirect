@@ -42,7 +42,10 @@ int rewrite_url(rewriter_t *rw, char *line, char *resp, size_t resp_size) {
 
 int rewriter_init(rewriter_t *rw) {
     if (rw == NULL) return null_rewriter_error;
-    rw->table = ht_create(TABLE_SIZE);
+    rw->table     = ht_create(TABLE_SIZE);
+    rw->__content = NULL;
+    rw->__tokens  = NULL;
+    rw->__count   = 0;
     return 0;
 }
 
@@ -72,14 +75,14 @@ int rewriter_update(rewriter_t *rw, char *content, jsmntok_t *tokens, int count)
         if (!is_present) ht_remove(rw->table, rw_key);
     }
 
+update_rw:
+    free(rw->__content);
+    
     for (size_t i = 1; i < count; i += 2) {
         get_pair(tokens, content, i, ps_key, ps_value);
         // syslog(LOG_INFO, "%s : %s", ps_key, ps_value);
         ht_insert(rw->table, ps_key, ps_value);
     }
-
-update_rw:
-    free(rw->__content);
 
     rw->__tokens  = tokens;
     rw->__content = content;
